@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+# This is just a wrapper script for the actual server so that you can set the
+# keys in a safe manner.
+
+export AWS_ACCESS_KEY_ID="secret"
+export AWS_SECRET_ACCESS_KEY="secret"
+export AWS_BUCKET="video-in-bucket"
+
+VID_SCRIPT="./video_upping_server.py"
+VID_PATH="`pwd`/videos/"
+
+if [ -e $VID_SCRIPT ]; then
+	$VID_SCRIPT $VID_PATH
+else
+	echo "Cannut seem to execute the video script $VID_SCRIPT"
+	echo "Exiting..."
+fi
+
+unset AWS_ACCESS_KEY_ID
+unset AWS_SECRET_ACCESS_KEY
+unset AWS_BUCKET
