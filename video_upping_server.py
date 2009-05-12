@@ -13,7 +13,7 @@ import sys
 import select
 import socket
 import random
-import md5
+import sha
 from Queue import Queue
 from threading import Thread
 from pyinotify import ProcessEvent, ThreadedNotifier, WatchManager, EventsCodes
@@ -86,7 +86,7 @@ class Client(Thread):
 			challenge = random.getrandbits(64)
 			self.client.send('Challenge: %li\n' % challenge)
 			# calculate the correct answer
-			answer = md5.new('%s %li' % (passkey, challenge)).digest()
+			answer = sha.new('%s %li' % (passkey, challenge)).hexdigest()
 			response = 'Response: %s\n' % answer
 			data = self.client.recv(self.size)
 			if response != data:

@@ -7,7 +7,7 @@
 import socket
 import sys
 import re
-import md5
+import sha
 
 passkey = ''
 if sys.argv[1:]:
@@ -27,7 +27,7 @@ try:
 	# first do auth
 	data = s.recv(size)
 	challenge = long(re.match('Challenge: (\d+)\n', data).group(1))
-	answer = md5.new('%s %li' % (passkey, challenge)).digest()
+	answer = sha.new('%s %li' % (passkey, challenge)).hexdigest()
 	response = 'Response: %s\n' % answer
 	s.send(response)
 	data = s.recv(size)
