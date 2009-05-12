@@ -6,31 +6,39 @@
 
 path = ''
 
-import os
-import re
 import time
 import sys
 import select
 import socket
 import random
-import sha
 from Queue import Queue
-from threading import Thread
+from threading import Thread, Condition
 from pyinotify import ProcessEvent, ThreadedNotifier, WatchManager, EventsCodes
+from ompvids import *
 
-bucket_name = os.environ['AWS_BUCKET'] # will assplode if not defined in environment
-passkey = os.environ['OMPVIDS_PASSKEY'] # will assplode if not defined in environment
 video_queue = Queue()
+
+def qsort(keys):
+	if len(keys) <= 1: return keys
+	return qsort( [ lt for lt in keys[1:] if lt.last_modified < keys[0].last_modified ] ) + [ keys[0] ]  +  qsort( [ ge for ge in keys[1:] if ge.last_modified >= keys[0].last_modified ] )
+
+def init_queue():
+	bucket = get_bucket()
+	keys = bucket.get_all_keys()
+	keys = qsort(keys)
+	for key in keys:
+		video_queue.put(key.key)
 
 class Server:
 	def __init__(self):
-		self.host = ''
-		self.port = 50001
+		self.host = host
+		self.port = port
 		self.backlog = 5
-		self.size = 4096
+		self.size = size
 		self.server = None
 		self.threads = []
 		self.open_socket()
+		self.condition = Condition()
 
 	def had_clients(self):
 		if len(self.threads) > 0:
@@ -58,7 +66,7 @@ class Server:
 		for s in inputready:
 			if s == self.server:
 				# handle the server socket
-				c = Client(self.server.accept())
+				c = Client(self.server.accept(), self.condition)
 				c.start()
 				self.threads.append(c)
 
@@ -67,18 +75,38 @@ class Server:
 				junk = sys.stdin.readline()
 
 	def __del__(self):
+		self.condition.acquire()
+		self.condition.notifyAll()
+		self.condition.release()
 		# close all threads
 		self.server.close()
 		for c in self.threads:
 			c.join()
 
 class Client(Thread):
-	def __init__(self,(client,address)):
+	class Fail(Exception):
+		def __init__(self, value):
+			self.value = value
+		def __str__(self):
+			return repr(self.value)
+
+	def __init__(self,(client,address), condition):
 		Thread.__init__(self)
 		self.client = client
-		self.client.settimeout(5) # really don't need to waste time here, get in and get out asap
+		self.client.settimeout(min_wait) # really don't need to waste time here, get in and get out asap
 		self.address = address
 		self.size = 4096
+		self.condition = condition
+	
+	def check_response(self, data):
+		if data == "what is\n":
+			try:
+				key = video_queue.get(True, max_wait)
+				if not key or len(key) < 1:
+					raise Client.Fail('failed 2 get')
+				self.client.send("something: %s\n" % key)
+			except Client.Fail:
+				self.client.send("nothing :(\n")
 
 	def run(self):
 		try:
@@ -86,7 +114,7 @@ class Client(Thread):
 			challenge = random.getrandbits(64)
 			self.client.send('Challenge: %li\n' % challenge)
 			# calculate the correct answer
-			answer = sha.new('%s %li' % (passkey, challenge)).hexdigest()
+			answer = get_answer(passkey, challenge)
 			response = 'Response: %s\n' % answer
 			data = self.client.recv(self.size)
 			if response != data:
@@ -97,15 +125,11 @@ class Client(Thread):
 				response = 'Come inside, friand!\n'
 				self.client.send(response)
 				print response,
-				while True:
-					data = self.client.recv(self.size)
-					if data:
-						self.client.send(data)
-						print data,
-					else:
-						break
+				data = self.client.recv(self.size)
+				resp = self.check_response(data)
 		except socket.timeout:
 			pass
+		print 'bye'
 		self.client.close()
 
 
@@ -113,25 +137,20 @@ class UpThread(Thread):
 	def __init__ (self, file):
 		Thread.__init__(self)
 		self.file = file
-		self.exp = re.compile('-notify-([A-Za-z0-9]+)-(.+)')
+		self.exp = re.compile('-notify-([A-Za-z0-9]+-.+)')
 	def run(self):
 		try:
-			import boto
-			from boto.s3.key import Key
 			# first determine the file name of the actual file
 			res = self.exp.match(self.file)
 			if not res:
 				return
-			id = res.group(1)
-			name = res.group(2)
-			key = id + '/' + name
-			file = id + '-' + name
-			print "Uploading '%s' as key '%s'" % (file, key)
-			conn = boto.connect_s3()
-			bucket = conn.create_bucket(bucket_name)
+			filename = res.group(1)
+			key = filename_to_key(filename)
+			print "Uploading '%s' as key '%s'" % (filename, key)
+			bucket = get_bucket()
 			k = Key(bucket)
 			k.key = key
-			k.set_contents_from_filename(path + file)
+			k.set_contents_from_filename(path + filename)
 			# if we reach here, everything succeeded and we need to queue this omp
 			print "Done uploading '%s', queueing up" % key
 			video_queue.put(key)
@@ -157,6 +176,9 @@ if __name__ == '__main__':
 	else:
 		print "Please supply the path to videos dir as the first argument"
 		sys.exit()
+
+	print 'initializing queue from S3'
+	init_queue()
 
 	mask = EventsCodes.IN_CREATE
 
