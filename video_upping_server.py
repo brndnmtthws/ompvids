@@ -12,19 +12,22 @@ import time
 import sys
 import select
 import socket
+import random
+import md5
 from Queue import Queue
 from threading import Thread
 from pyinotify import ProcessEvent, ThreadedNotifier, WatchManager, EventsCodes
 
 bucket_name = os.environ['AWS_BUCKET'] # will assplode if not defined in environment
+passkey = os.environ['OMPVIDS_PASSKEY'] # will assplode if not defined in environment
 video_queue = Queue()
 
 class Server:
 	def __init__(self):
 		self.host = ''
-		self.port = 50000
+		self.port = 50001
 		self.backlog = 5
-		self.size = 1024
+		self.size = 4096
 		self.server = None
 		self.threads = []
 		self.open_socket()
@@ -75,20 +78,35 @@ class Client(Thread):
 		self.client = client
 		self.client.settimeout(5) # really don't need to waste time here, get in and get out asap
 		self.address = address
-		self.size = 1024
+		self.size = 4096
 
 	def run(self):
-		while True:
-			try:
-				data = self.client.recv(self.size)
-				print data
-				if data:
-					self.client.send(data)
-				else:
-					self.client.close()
-					break
-			except socket.timeout:
-				break
+		try:
+			# first do auth
+			challenge = random.getrandbits(64)
+			self.client.send('Challenge: %li\n' % challenge)
+			# calculate the correct answer
+			answer = md5.new('%s %li' % (passkey, challenge)).digest()
+			response = 'Response: %s\n' % answer
+			data = self.client.recv(self.size)
+			if response != data:
+				response = 'Bad key :(\n'
+				self.client.send(response)
+				print response,
+			else:
+				response = 'Come inside, friand!\n'
+				self.client.send(response)
+				print response,
+				while True:
+					data = self.client.recv(self.size)
+					if data:
+						self.client.send(data)
+						print data,
+					else:
+						break
+		except socket.timeout:
+			pass
+		self.client.close()
 
 
 class UpThread(Thread):

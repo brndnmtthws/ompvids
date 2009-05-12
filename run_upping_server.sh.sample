@@ -6,6 +6,7 @@
 export AWS_ACCESS_KEY_ID="secret"
 export AWS_SECRET_ACCESS_KEY="secret"
 export AWS_BUCKET="video-in-bucket"
+export OMPVIDS_PASSKEY="secret"
 
 VID_SCRIPT="./video_upping_server.py"
 VID_PATH="`pwd`/videos/"
@@ -20,3 +21,4 @@ fi
 unset AWS_ACCESS_KEY_ID
 unset AWS_SECRET_ACCESS_KEY
 unset AWS_BUCKET
+unset OMPVIDS_PASSKEY
