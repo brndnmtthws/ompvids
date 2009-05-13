@@ -6,7 +6,6 @@
 
 path = ''
 
-import time
 import select
 import socket
 import random

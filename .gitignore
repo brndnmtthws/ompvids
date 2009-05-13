@@ -1,1 +1,3 @@
 .*.swp
+run_upping_client.sh
+run_upping_server.sh

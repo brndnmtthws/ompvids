@@ -6,6 +6,7 @@
 
 import socket
 from ompvids import *
+import time
 
 passkey = ''
 bucket_name = os.environ['AWS_BUCKET'] # will assplode if not defined in environment
@@ -55,6 +56,16 @@ if __name__ == '__main__':
 	else:
 		print "Please supply the passkey as the first argument"
 		sys.exit()
-	key = check_server_for_videor()
-	if key:
-		process_new_videor(key)
+	while True:
+		try:
+			key = check_server_for_videor()
+			if key:
+				process_new_videor(key)
+			time.sleep(5)
+		except KeyboardInterrupt:
+			print 'shutting down...'
+			break
+		except Exception, err:
+			# otherwise keep on looping
+			print err
+
