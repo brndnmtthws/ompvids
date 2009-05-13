@@ -21,6 +21,7 @@ def do_out(key, bucket, suffix, type):
 	out_k.set_metadata("Content-Type", type)
 	out_k.set_contents_from_filename(tmp_path + key_to_filename(key) + suffix)
 	out_k.set_acl('public-read')
+	os.unlink(tmp_path + key_to_filename(key) + suffix)
 
 def process_new_videor(key):
 	print 'doing it omp with', key

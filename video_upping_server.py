@@ -155,6 +155,7 @@ class UpThread(Thread):
 			# if we reach here, everything succeeded and we need to queue this omp
 			print "Done uploading '%s', queueing up" % key
 			video_queue.put(key)
+			os.unlink(path + filename)
 		except IndexError:
 			pass
 
