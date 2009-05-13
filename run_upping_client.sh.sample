@@ -12,6 +12,7 @@ export AWS_SECRET_ACCESS_KEY="secret"
 export AWS_IN_BUCKET="video-in-bucket"
 export AWS_OUT_BUCKET="video-out-bucket"
 export OMPVIDS_PASSKEY="secret"
+export SERVER_HOSTNAME="localhost"
 
 VID_SCRIPT="./video_upping_client.py"
 TMP_PATH="/tmp"

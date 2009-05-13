@@ -11,6 +11,7 @@ import time
 passkey = ''
 in_bucket_name = os.environ['AWS_IN_BUCKET'] # will assplode if not defined in environment
 out_bucket_name = os.environ['AWS_OUT_BUCKET']
+server_hostname = os.environ['SERVER_HOSTNAME']
 
 tmp_path = '/tmp/'
 
