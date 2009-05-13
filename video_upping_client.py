@@ -42,8 +42,8 @@ def process_new_videor(key):
 def check_server_for_videor():
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		s.connect((server_hostname,port))
 		s.settimeout(min_wait)
+		s.connect((server_hostname,port))
 		# first do auth
 		data = s.recv(size)
 		challenge = long(re.match('Challenge: (\d+)\n', data).group(1))
