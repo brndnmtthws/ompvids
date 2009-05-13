@@ -25,7 +25,7 @@ end
 
 def generate_preview(input, output, width)
   # mplayer is not very happy with spaces in the output file name, p awesome
-  system('mplayer', '-vf', 'scale', '-zoom', '-xy', THUMBWIDTH.to_s, '-benchmark', '-ao', 'null', '-endpos', PREVIEW_DURATION.to_s, '-vo', "gif89a:fps=#{PREVIEW_FPS}:output=#{TMP_PATH}/preview.gif", input) or return false
+  system('mplayer', '-vf', 'scale', '-zoom', '-xy', THUMBWIDTH.to_s, '-benchmark', '-ao', 'null', '-endpos', PREVIEW_DURATION.to_s, '-vo', "gif89a:fps=#{PREVIEW_FPS}:output=\"#{TMP_PATH}/preview.gif\"", input) or return false
   system('mogrify', '-layers', 'optimize', "#{TMP_PATH}/preview.gif") or return false
   FileUtils::mv("#{TMP_PATH}/preview.gif", output)
 end

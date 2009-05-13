@@ -9,14 +9,13 @@ import os
 import re
 import sys
 
-bucket_name = os.environ['AWS_BUCKET'] # will assplode if not defined in environment
 passkey = os.environ['OMPVIDS_PASSKEY'] # will assplode if not defined in environment
 
 bind_server_to_address = ''
-server_hostname = 'omploader.org'
+server_hostname = 'localhost'
 port = 50000
 size = 4096
-max_wait = 30 # seconds
+max_wait = 600 # seconds
 min_wait = 5 # seconds
 
 fn_exp = re.compile('([A-Za-z0-9]+)-(.+)')
@@ -40,7 +39,7 @@ def key_to_filename(key):
 	filename = id + '-' + name
 	return filename
 
-def get_bucket():
+def get_bucket(bucket_name):
 	conn = boto.connect_s3()
 	return conn.create_bucket(bucket_name)
 

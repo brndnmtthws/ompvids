@@ -9,17 +9,29 @@ from ompvids import *
 import time
 
 passkey = ''
-bucket_name = os.environ['AWS_BUCKET'] # will assplode if not defined in environment
+in_bucket_name = os.environ['AWS_IN_BUCKET'] # will assplode if not defined in environment
+out_bucket_name = os.environ['AWS_OUT_BUCKET']
 
 tmp_path = '/tmp/'
 
 def process_new_videor(key):
 	print 'doing it omp with', key
-	bucket = get_bucket()
-	k = Key(bucket)
-	k.key = key
+	bucket = get_bucket(in_bucket_name)
+	in_k = Key(bucket)
+	in_k.key = key
 	print key
-	k.get_contents_to_filename(tmp_path + key_to_filename(key))
+	in_k.get_contents_to_filename(tmp_path + key_to_filename(key))
+	if os.system('./encode.rb "%s"' % (tmp_path + key_to_filename(key))):
+		# error!
+		print 'ono, error!'
+	else:
+		# success!
+		bucket = get_bucket(out_bucket_name)
+		out_k = Key(bucket)
+		out_k.key = key + '.ogg'
+		out_k.set_contents_from_filename(tmp_path + key_to_filename(key) + '.ogg')
+		out_k.set_acl('public-read')
+		in_k.delete()
 
 def check_server_for_videor():
 	try:

@@ -14,6 +14,8 @@ from threading import Thread, Condition
 from pyinotify import ProcessEvent, ThreadedNotifier, WatchManager, EventsCodes
 from ompvids import *
 
+in_bucket_name = os.environ['AWS_IN_BUCKET'] # will assplode if not defined in environment
+
 video_queue = Queue()
 
 def qsort(keys):
@@ -21,7 +23,7 @@ def qsort(keys):
 	return qsort( [ lt for lt in keys[1:] if lt.last_modified < keys[0].last_modified ] ) + [ keys[0] ]  +  qsort( [ ge for ge in keys[1:] if ge.last_modified >= keys[0].last_modified ] )
 
 def init_queue():
-	bucket = get_bucket()
+	bucket = get_bucket(in_bucket_name)
 	keys = bucket.get_all_keys()
 	keys = qsort(keys)
 	for key in keys:
@@ -103,7 +105,7 @@ class Client(Thread):
 				if not key or len(key) < 1:
 					raise Client.Fail('failed 2 get')
 				self.client.send("something: %s\n" % key)
-			except Client.Fail:
+			except Client.Fail, Empty:
 				self.client.send("nothing :(\n")
 
 	def run(self):
@@ -145,7 +147,7 @@ class UpThread(Thread):
 			filename = res.group(1)
 			key = filename_to_key(filename)
 			print "Uploading '%s' as key '%s'" % (filename, key)
-			bucket = get_bucket()
+			bucket = get_bucket(in_bucket_name)
 			k = Key(bucket)
 			k.key = key
 			k.set_contents_from_filename(path + filename)
