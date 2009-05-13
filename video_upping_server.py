@@ -9,7 +9,7 @@ path = ''
 import select
 import socket
 import random
-from Queue import Queue
+from Queue import Queue, Empty
 from threading import Thread, Condition
 from pyinotify import ProcessEvent, ThreadedNotifier, WatchManager, EventsCodes
 from ompvids import *
@@ -38,7 +38,6 @@ class Server:
 		self.server = None
 		self.threads = []
 		self.open_socket()
-		self.condition = Condition()
 
 	def had_clients(self):
 		if len(self.threads) > 0:
@@ -66,7 +65,7 @@ class Server:
 		for s in inputready:
 			if s == self.server:
 				# handle the server socket
-				c = Client(self.server.accept(), self.condition)
+				c = Client(self.server.accept())
 				c.start()
 				self.threads.append(c)
 
@@ -75,9 +74,6 @@ class Server:
 				junk = sys.stdin.readline()
 
 	def __del__(self):
-		self.condition.acquire()
-		self.condition.notifyAll()
-		self.condition.release()
 		# close all threads
 		self.server.close()
 		for c in self.threads:
@@ -90,23 +86,29 @@ class Client(Thread):
 		def __str__(self):
 			return repr(self.value)
 
-	def __init__(self,(client,address), condition):
+	def __init__(self,(client,address)):
 		Thread.__init__(self)
 		self.client = client
 		self.client.settimeout(min_wait) # really don't need to waste time here, get in and get out asap
 		self.address = address
 		self.size = 4096
-		self.condition = condition
-	
+
 	def check_response(self, data):
 		if data == "what is\n":
-			try:
-				key = video_queue.get(True, max_wait)
-				if not key or len(key) < 1:
-					raise Client.Fail('failed 2 get')
-				self.client.send("something: %s\n" % key)
-			except Client.Fail, Empty:
-				self.client.send("nothing :(\n")
+			run = True
+			while run:
+				try:
+					run = False
+					key = video_queue.get(True, max_wait)
+					if not key or len(key) < 1:
+						raise Client.Fail('failed 2 get')
+					self.client.send("something: %s\n" % key)
+				except (Client.Fail, Empty):
+					self.client.send("nothing :(\n")
+					run = True
+				except socket.error:
+					if key:
+						video_queue.put(key)
 
 	def run(self):
 		try:
@@ -124,7 +126,6 @@ class Client(Thread):
 			else:
 				response = 'Come inside, friand!\n'
 				self.client.send(response)
-				print response,
 				data = self.client.recv(self.size)
 				resp = self.check_response(data)
 		except socket.timeout:

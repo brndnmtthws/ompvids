@@ -12,10 +12,10 @@ import sys
 passkey = os.environ['OMPVIDS_PASSKEY'] # will assplode if not defined in environment
 
 bind_server_to_address = ''
-port = 50000
+port = 50001
 size = 4096
-max_wait = 600 # seconds
-min_wait = 5 # seconds
+max_wait = 10 # seconds
+min_wait = 1 # seconds
 
 fn_exp = re.compile('([A-Za-z0-9]+)-(.+)')
 key_exp = re.compile('([A-Za-z0-9]+)/(.+)')

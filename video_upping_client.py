@@ -15,6 +15,13 @@ server_hostname = os.environ['SERVER_HOSTNAME']
 
 tmp_path = '/tmp/'
 
+def do_out(key, bucket, suffix, type):
+	out_k = Key(bucket)
+	out_k.key = key + suffix
+	out_k.set_metadata("Content-Type", type)
+	out_k.set_contents_from_filename(tmp_path + key_to_filename(key) + suffix)
+	out_k.set_acl('public-read')
+
 def process_new_videor(key):
 	print 'doing it omp with', key
 	bucket = get_bucket(in_bucket_name)
@@ -28,11 +35,8 @@ def process_new_videor(key):
 	else:
 		# success!
 		bucket = get_bucket(out_bucket_name)
-		out_k = Key(bucket)
-		out_k.key = key + '.ogg'
-		out_k.set_contents_from_filename(tmp_path + key_to_filename(key) + '.ogg')
-		out_k.set_acl('public-read')
-		out_k.content_type = 'application/ogg'
+		do_out(key, bucket, '.ogg', 'application/ogg')
+		do_out(key, bucket, '.gif', 'image/gif')
 		in_k.delete()
 
 def check_server_for_videor():
@@ -47,14 +51,13 @@ def check_server_for_videor():
 		response = 'Response: %s\n' % answer
 		s.send(response)
 		data = s.recv(size)
-		print data,
 		if data == 'Come inside, friand!\n':
 			s.send("what is\n")
 			exp = re.compile('something: (.*)\n')
 			# nothing, lettuce just wait a while
 			res = exp.match(data)
 			while not res:
-				s.settimeout(max_wait)
+				s.settimeout(max_wait * 2)
 				data = s.recv(size)
 				s.settimeout(min_wait)
 				res = exp.match(data)
@@ -78,7 +81,7 @@ if __name__ == '__main__':
 			print "Path '%s' does not exist" % tmp_path
 	while True:
 		try:
-			time.sleep(5)
+			time.sleep(min_wait)
 			key = check_server_for_videor()
 			if key:
 				process_new_videor(key)
