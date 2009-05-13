@@ -5,7 +5,6 @@
 # until there is something to do.
 
 import socket
-import sys
 from ompvids import *
 
 passkey = ''
