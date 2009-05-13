@@ -64,10 +64,10 @@ if __name__ == '__main__':
 			print "Path '%s' does not exist" % tmp_path
 	while True:
 		try:
+			time.sleep(5)
 			key = check_server_for_videor()
 			if key:
 				process_new_videor(key)
-			time.sleep(5)
 		except KeyboardInterrupt:
 			print 'shutting down...'
 			break
