@@ -13,9 +13,10 @@ export AWS_BUCKET="video-in-bucket"
 export OMPVIDS_PASSKEY="secret"
 
 VID_SCRIPT="./video_upping_client.py"
+TMP_PATH="/tmp"
 
 if [ -e $VID_SCRIPT ]; then
-	$VID_SCRIPT $OMPVIDS_PASSKEY
+	$VID_SCRIPT $OMPVIDS_PASSKEY $TMP_PATH
 else
 	echo "Cannut seem to execute the video script $VID_SCRIPT"
 	echo "Exiting..."

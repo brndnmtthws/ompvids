@@ -56,6 +56,12 @@ if __name__ == '__main__':
 	else:
 		print "Please supply the passkey as the first argument"
 		sys.exit()
+	if sys.argv[2:]:
+		tmp_path = sys.argv[2]
+		if tmp_path[len(tmp_path) - 1] != '/':
+			tmp_path = tmp_path + '/'
+		if not os.path.exists(tmp_path):
+			print "Path '%s' does not exist" % tmp_path
 	while True:
 		try:
 			key = check_server_for_videor()
