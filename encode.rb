@@ -2,11 +2,12 @@
 
 require 'fileutils'
 
-WIDTH = 640
 THUMBWIDTH = 120
-THUMBHEIGHT = 90
+THUMBHEIGHT = 120
 PREVIEW_DURATION = 5
 PREVIEW_FPS = 5
+AUDIO_QUALITY = 5
+VIDEO_QUALITY = 8
 
 # returns an array [width, height]
 def image_size(filename)
@@ -23,7 +24,7 @@ end
 
 def generate_preview(input, output, width)
   # mplayer is not very happy with spaces in the output file name, p awesome
-  system('mplayer', '-vf', 'scale', '-zoom', '-xy', THUMBWIDTH.to_s, '-speed', '100', '-ao', 'null', '-endpos', PREVIEW_DURATION.to_s, '-vo', "gif89a:fps=#{PREVIEW_FPS}:output=preview.gif", input) or return false
+  system('mplayer', '-vf', 'scale', '-zoom', '-xy', THUMBWIDTH.to_s, '-benchmark', '-ao', 'null', '-endpos', PREVIEW_DURATION.to_s, '-vo', "gif89a:fps=#{PREVIEW_FPS}:output=preview.gif", input) or return false
   system('mogrify', '-layers', 'optimize', 'preview.gif') or return false
   FileUtils::mv('preview.gif', output)
 end
@@ -32,7 +33,7 @@ input = ARGV[0]
 output = "#{input}.ogg"
 thumbnail = "#{input}.gif"
 
-system('ffmpeg2theora', '--optimize', '-o', output, '-x', WIDTH.to_s, input) or exit 1
+#system('ffmpeg2theora', '--audioquality', AUDIO_QUALITY.to_s, '--videoquality', VIDEO_QUALITY.to_s, '--optimize', '-o', output, input) or exit 1
 generate_preview(input, thumbnail, THUMBWIDTH) or return 1
 
 # does this thing fit in the thumbnail box?
