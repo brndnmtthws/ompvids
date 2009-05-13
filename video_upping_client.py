@@ -32,6 +32,7 @@ def process_new_videor(key):
 		out_k.key = key + '.ogg'
 		out_k.set_contents_from_filename(tmp_path + key_to_filename(key) + '.ogg')
 		out_k.set_acl('public-read')
+		out_k.content_type = 'application/ogg'
 		in_k.delete()
 
 def check_server_for_videor():
