@@ -7,7 +7,7 @@ THUMBHEIGHT = 90
 PREVIEW_DURATION = 5
 PREVIEW_FPS = 5
 AUDIO_QUALITY = 5
-VIDEO_QUALITY = 8
+VIDEO_QUALITY = 7
 TMP_PATH = '/tmp'
 
 # returns an array [width, height]
