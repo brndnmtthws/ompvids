@@ -11,8 +11,9 @@ import sys
 
 bucket_name = os.environ['AWS_BUCKET'] # will assplode if not defined in environment
 passkey = os.environ['OMPVIDS_PASSKEY'] # will assplode if not defined in environment
-			
-host = 'localhost'
+
+bind_server_to_address = ''
+server_hostname = 'localhost'
 port = 50000
 size = 4096
 max_wait = 30 # seconds

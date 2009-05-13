@@ -30,7 +30,7 @@ def init_queue():
 
 class Server:
 	def __init__(self):
-		self.host = host
+		self.host = bind_server_to_address
 		self.port = port
 		self.backlog = 5
 		self.size = size
