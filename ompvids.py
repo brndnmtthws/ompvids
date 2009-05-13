@@ -7,6 +7,7 @@ from boto.s3.key import Key
 import sha
 import os
 import re
+import sys
 
 bucket_name = os.environ['AWS_BUCKET'] # will assplode if not defined in environment
 passkey = os.environ['OMPVIDS_PASSKEY'] # will assplode if not defined in environment
