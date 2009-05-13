@@ -159,13 +159,20 @@ class UpThread(Thread):
 		except IndexError:
 			pass
 
+notify_exp = re.compile('-notify-.*')
+
+def init_upthreads():
+	files = os.listdir(path)
+	for file in files:
+		if notify_exp.match(file):
+			UpThread(file).start()
+
 class PThinger(ProcessEvent):
-	exp = re.compile('-notify-.*')
 	def process_IN_CREATE(self, event):
 		"""
 		process 'IN_CREATE' events
 		"""
-		if self.exp.match(event.name):
+		if notify_exp.match(event.name):
 			UpThread(event.name).start()
 
 if __name__ == '__main__':
@@ -177,8 +184,10 @@ if __name__ == '__main__':
 			print "Path '%s' does not exist" % path
 	else:
 		print "Please supply the path to videos dir as the first argument"
-		sys.exit()
+		sys.exit(1)
 
+	print 'checking for files to be uploaded...'
+	init_upthreads()
 	print 'initializing queue from S3'
 	init_queue()
 
