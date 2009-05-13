@@ -4,7 +4,7 @@
 
 import boto
 from boto.s3.key import Key
-import sha
+import hashlib
 import os
 import re
 import sys
@@ -45,4 +45,4 @@ def get_bucket(bucket_name):
 
 
 def get_answer(passkey, challenge):
-	return sha.new('%s %li' % (passkey, challenge)).hexdigest()
+	return hashlib.sha224('%s %li' % (passkey, challenge)).hexdigest()
