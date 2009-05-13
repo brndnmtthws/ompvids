@@ -29,11 +29,16 @@ def generate_preview(input, output, width)
   FileUtils::mv('preview.gif', output)
 end
 
+if ARGV.empty?
+  puts "usage: #{$0} input-video-file"
+  exit 1
+end
+
 input = ARGV[0]
 output = "#{input}.ogg"
 thumbnail = "#{input}.gif"
 
-#system('ffmpeg2theora', '--audioquality', AUDIO_QUALITY.to_s, '--videoquality', VIDEO_QUALITY.to_s, '--optimize', '-o', output, input) or exit 1
+system('ffmpeg2theora', '--audioquality', AUDIO_QUALITY.to_s, '--videoquality', VIDEO_QUALITY.to_s, '--optimize', '-o', output, input) or exit 1
 generate_preview(input, thumbnail, THUMBWIDTH) or return 1
 
 # does this thing fit in the thumbnail box?
