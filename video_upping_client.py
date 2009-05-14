@@ -99,7 +99,7 @@ def report_failure(key):
 			pass
 		s.close()
 
-def report_success(key):
+def report_success(key, size):
 	success = False
 	while not success:
 		try:
