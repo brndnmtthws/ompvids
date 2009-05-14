@@ -32,7 +32,7 @@ def process_new_videor(key):
 	in_k.key = key
 	print key
 	in_k.get_contents_to_filename(tmp_path + key_to_filename(key))
-	if os.system('./encode.rb "%s"' % (tmp_path + key_to_filename(key))):
+	if os.system(sys.path[0] + 'encode.rb "%s"' % (tmp_path + key_to_filename(key))):
 		# error!
 		os.unlink(tmp_path + key_to_filename(key) + '.ogg')
 		os.unlink(tmp_path + key_to_filename(key) + '.gif')
