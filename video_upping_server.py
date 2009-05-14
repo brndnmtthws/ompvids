@@ -35,7 +35,7 @@ class Server:
 		self.host = bind_server_to_address
 		self.port = server_port
 		self.backlog = 5
-		self.size = size
+		self.size = socket_size
 		self.server = None
 		self.threads = []
 		self.open_socket()
