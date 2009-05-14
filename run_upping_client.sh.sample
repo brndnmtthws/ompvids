@@ -14,7 +14,7 @@ export AWS_OUT_BUCKET="video-out-bucket"
 export OMPVIDS_PASSKEY="secret"
 export SERVER_HOSTNAME="localhost"
 
-VID_SCRIPT="./video_upping_client.py"
+VID_SCRIPT="`dirname $0`/video_upping_client.py"
 TMP_PATH="/tmp"
 
 if [ -e $VID_SCRIPT ]; then
