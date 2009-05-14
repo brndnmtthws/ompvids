@@ -84,7 +84,7 @@ def report_success(id, size):
 	os.system("%s -c %i %s" % (omploader_videor_script, size, id))
 
 def report_failure(id):
-	os.system("%s -d %s" % (omploader_videor_script, size, id))
+	os.system("%s -d %s" % (omploader_videor_script, id))
 
 class Client(Thread):
 	class Fail(Exception):
