@@ -15,6 +15,7 @@ from pyinotify import ProcessEvent, ThreadedNotifier, WatchManager, EventsCodes
 from ompvids import *
 
 in_bucket_name = os.environ['AWS_IN_BUCKET'] # will assplode if not defined in environment
+omploader_videor_script = os.environ['PATH_TO_VIDEOR_SCRIPT'] # will assplode if not defined in environment
 
 video_queue = Queue()
 
@@ -79,6 +80,12 @@ class Server:
 		for c in self.threads:
 			c.join()
 
+def report_success(id, size):
+	system("%s -c %i %s" % (omploader_videor_script, size, id))
+
+def report_failure(id):
+	system("%s -d %s" % (omploader_videor_script, size, id))
+
 class Client(Thread):
 	class Fail(Exception):
 		def __init__(self, value):
@@ -109,6 +116,20 @@ class Client(Thread):
 				except socket.error:
 					if key:
 						video_queue.put(key)
+		elif:
+			res1 = re.match('failure with ([A-Za-z0-9]+)/.+\n', data)
+			res2 = re.match('success with (\d+) ([A-Za-z0-9]+)/.+\n', data)
+			if res1:
+				# fail :(
+				id = res1.group(1)
+				report_failure(id)
+				self.client.send("o, ty\n")
+			elif res2:
+				# have succeed!
+				size = int(res2.group(1))
+				id = res2.group(2)
+				report_success(id, size)
+				self.client.send("joy, ty\n")
 
 	def run(self):
 		try:
