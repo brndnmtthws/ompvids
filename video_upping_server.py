@@ -81,10 +81,10 @@ class Server:
 			c.join()
 
 def report_success(id, size):
-	system("%s -c %i %s" % (omploader_videor_script, size, id))
+	os.system("%s -c %i %s" % (omploader_videor_script, size, id))
 
 def report_failure(id):
-	system("%s -d %s" % (omploader_videor_script, size, id))
+	os.system("%s -d %s" % (omploader_videor_script, size, id))
 
 class Client(Thread):
 	class Fail(Exception):
