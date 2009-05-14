@@ -19,7 +19,7 @@ PREVIEW_FPS = 5
 
 AUDIO_QUALITY = 5
 VIDEO_QUALITY = 7
-TMP_PATH = '/media/medium/scratch'
+TMP_PATH = '/tmp'
 
 def video_info(filename)
   f = IO.popen("mplayer -ao null -vo null -msglevel identify=6 -endpos 0 '#{filename}'")
