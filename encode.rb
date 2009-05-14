@@ -23,11 +23,13 @@ def image_size(filename)
   return [width, height]
 end
 
-def generate_preview(input, output, width)
+def generate_preview(input, output, output_still, width)
   # mplayer is not very happy with spaces in the output file name, p awesome
   system('mplayer', '-vf', 'scale', '-zoom', '-xy', THUMBWIDTH.to_s, '-benchmark', '-ao', 'null', '-endpos', PREVIEW_DURATION.to_s, '-vo', "gif89a:fps=#{PREVIEW_FPS}:output=\"#{TMP_PATH}/preview.gif\"", input) or return false
   system('mogrify', '-layers', 'optimize', "#{TMP_PATH}/preview.gif") or return false
+  system('convert', '-coalesce', '-flatten', "#{TMP_PATH}/preview.gif", "#{TMP_PATH}/preview-still.gif") or return false
   FileUtils::mv("#{TMP_PATH}/preview.gif", output)
+  FileUtils::mv("#{TMP_PATH}/preview-still.gif", output_still)
 end
 
 if ARGV.empty?
@@ -41,14 +43,15 @@ if ARGV[1]
 end
 output = "#{input}.ogg"
 thumbnail = "#{input}.gif"
+thumbnail_still = "#{input}-still.gif"
 
 system('ffmpeg2theora', '--audioquality', AUDIO_QUALITY.to_s, '--videoquality', VIDEO_QUALITY.to_s, '--optimize', '-o', output, input) or exit 1
-generate_preview(input, thumbnail, THUMBWIDTH) or return 1
+generate_preview(input, thumbnail, thumbnail_still, THUMBWIDTH) or return 1
 
 # does this thing fit in the thumbnail box?
 width, height = image_size thumbnail
 if height > THUMBHEIGHT
   # it doesn't! fit to height instead
-  generate_preview(input, thumbnail, THUMBHEIGHT * width / height) or exit 1
+  generate_preview(input, thumbnail, thumbnail_still, THUMBHEIGHT * width / height) or exit 1
 end
 

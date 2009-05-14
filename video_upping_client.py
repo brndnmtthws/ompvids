@@ -36,6 +36,7 @@ def process_new_videor(key):
 		# error!
 		os.unlink(tmp_path + key_to_filename(key) + '.ogg')
 		os.unlink(tmp_path + key_to_filename(key) + '.gif')
+		os.unlink(tmp_path + key_to_filename(key) + '-still.gif')
 		os.unlink(tmp_path + key_to_filename(key))
 		in_k.delete()
 		return False
@@ -44,6 +45,7 @@ def process_new_videor(key):
 		bucket = get_bucket(out_bucket_name)
 		size = do_out(key, bucket, '.ogg', 'application/ogg')
 		do_out(key, bucket, '.gif', 'image/gif')
+		do_out(key, bucket, '-still.gif', 'image/gif')
 		in_k.delete()
 		return size
 
