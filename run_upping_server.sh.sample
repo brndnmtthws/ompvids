@@ -16,7 +16,7 @@ VID_SCRIPT="./video_upping_server.py"
 VID_PATH="`pwd`/videos/"
 
 # path to the 'videor' script in the omploader installation script dir
-export PATH_TO_VIDEOR_SCRIPT="/var/www/omploader/scripts/videor"
+export PATH_TO_VIDEOR_SCRIPT="/var/www/omploader/scripts/videors"
 
 if [ -e $VID_SCRIPT ]; then
 	$VID_SCRIPT $VID_PATH
