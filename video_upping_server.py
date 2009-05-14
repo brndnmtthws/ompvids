@@ -33,7 +33,7 @@ def init_queue():
 class Server:
 	def __init__(self):
 		self.host = bind_server_to_address
-		self.port = port
+		self.port = server_port
 		self.backlog = 5
 		self.size = size
 		self.server = None
@@ -98,7 +98,7 @@ class Client(Thread):
 		self.client = client
 		self.client.settimeout(min_wait) # really don't need to waste time here, get in and get out asap
 		self.address = address
-		self.size = 4096
+		self.size = socket_size
 
 	def check_response(self, data):
 		if data == "what is\n":
