@@ -4,7 +4,8 @@ require 'fileutils'
 
 THUMBWIDTH = 120
 THUMBHEIGHT = 90
-PREVIEW_DURATION = 5
+INPUT_FPS = 120
+PREVIEW_DURATION = 30
 PREVIEW_FPS = 5
 AUDIO_QUALITY = 5
 VIDEO_QUALITY = 7
@@ -25,7 +26,7 @@ end
 
 def generate_preview(input, output, output_still, width)
   # mplayer is not very happy with spaces in the output file name, p awesome
-  system('mplayer', '-vf', 'scale', '-zoom', '-xy', THUMBWIDTH.to_s, '-benchmark', '-ao', 'null', '-endpos', PREVIEW_DURATION.to_s, '-vo', "gif89a:fps=#{PREVIEW_FPS}:output=\"#{TMP_PATH}/preview.gif\"", input) or return false
+  system('mplayer', '-vf', 'scale', '-zoom', '-fps', INPUT_FPS.to_s, '-xy', THUMBWIDTH.to_s, '-benchmark', '-ao', 'null', '-endpos', PREVIEW_DURATION.to_s, '-vo', "gif89a:fps=#{PREVIEW_FPS}:output=\"#{TMP_PATH}/preview.gif\"", input) or return false
   system('mogrify', '-layers', 'optimize', "#{TMP_PATH}/preview.gif") or return false
   system('convert', '-coalesce', '-flatten', "#{TMP_PATH}/preview.gif", "#{TMP_PATH}/preview-still.gif") or return false
   FileUtils::mv("#{TMP_PATH}/preview.gif", output)
