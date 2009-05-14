@@ -19,14 +19,16 @@ PREVIEW_FPS = 5
 
 AUDIO_QUALITY = 5
 VIDEO_QUALITY = 7
-TMP_PATH = '/tmp'
+TMP_PATH = '/media/medium/scratch'
 
 def video_info(filename)
-  f = IO.popen("mplayer -ao null -vo null -identify -endpos 0 '#{filename}'")
+  f = IO.popen("mplayer -ao null -vo null -msglevel identify=6 -endpos 0 '#{filename}'")
   info = {}
   f.each do |line|
 	if line =~ /^ID_(.+)=(.+)/
 	  info[$1] = $2
+	elsif line =~ /^\[mkv\] Track ID (\d+): subtitles \(S_TEXT\/ASS\)/
+	  info['ASS'] = $1
 	end
   end
   # pro method of determining whether this is a valid video
@@ -71,6 +73,21 @@ thumbnail = "#{input}.gif"
 thumbnail_still = "#{input}-still.gif"
 
 (info = video_info(input)) or exit 1
+#require 'pp'; pp info
+
+if info.has_key? 'ASS'
+  subtitled_yuv = File.join(TMP_PATH, 'subtitled.yuv')
+  subtitled_avi = File.join(TMP_PATH, 'subtitled.avi')
+  subtitled_mkv = File.join(TMP_PATH, 'subtitled.mkv')
+  # burn those subtitles in
+  system('mplayer', '-speed', '100', '-ass', '-ao', 'null', '-vo', "yuv4mpeg:file=#{subtitled_yuv}", input) or exit 1
+  # lossless codec for intermediate stuff, pretty advanced
+  system('mencoder', subtitled_yuv, '-ovc', 'lavc', '-lavcopts', 'vcodec=ffv1', '-o', subtitled_avi) or exit 1
+  system('mkvmerge', '-o', subtitled_mkv, '-D', input, subtitled_avi) or exit 1
+
+  # work with the haxed mkv from now on
+  input = subtitled_mkv
+end
 
 # don't re-encode if you don't have to
 if (info['DEMUXER'] != 'ogg') or (info['VIDEO_FORMAT'] != 'theo') or (info['AUDIO_FORMAT'] != 'vrbs')
