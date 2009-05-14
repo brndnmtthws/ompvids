@@ -52,14 +52,18 @@ def process_new_videor(key):
 def connect():
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.settimeout(min_wait)
-	s.connect((server_hostname,port))
+	s.connect((server_hostname,server_port))
 	# first do auth
-	data = s.recv(size)
-	challenge = long(re.match('Challenge: (\d+)\n', data).group(1))
+	data = s.recv(socket_size)
+	res = re.match('Challenge: (\d+)\n', data)
+	if not res:
+		return False
+	word = res.group(1)
+	challenge = long(word)
 	answer = get_answer(passkey, challenge)
 	response = 'Response: %s\n' % answer
 	s.send(response)
-	data = s.recv(size)
+	data = s.recv(socket_size)
 	if data == 'Come inside, friand!\n':
 		return s
 
@@ -75,13 +79,13 @@ def check_server_for_videor():
 		res = exp.match(data)
 		while not res:
 			s.settimeout(max_wait * 2)
-			data = s.recv(size)
+			data = s.recv(socket_size)
 			s.settimeout(min_wait)
 			res = exp.match(data)
+		s.close()
 		return res.group(1)
 	except socket.timeout:
 		pass
-	s.close()
 
 def report_failure(key):
 	success = False
@@ -90,16 +94,16 @@ def report_failure(key):
 			# try until succeed
 			s = connect()
 			if not s:
-				time.sleep(min_wait)
-				break
+				time.sleep(max_wait)
+				continue
 			s.send("failure with %s\n" % key)
-			data = s.recv(size)
+			data = s.recv(socket_size)
 			if data == "o, ty\n":
 				success = True
+			s.close()
 		except socket.timeout:
-			time.sleep(min_wait)
+			time.sleep(max_wait)
 			pass
-		s.close()
 
 def report_success(key, size):
 	success = False
@@ -108,16 +112,16 @@ def report_success(key, size):
 			# try until succeed
 			s = connect()
 			if not s:
-				time.sleep(min_wait)
-				break
+				time.sleep(max_wait)
+				continue
 			s.send("success with %i %s\n" % (size, key))
-			data = s.recv(size)
+			data = s.recv(socket_size)
 			if data == "joy, ty\n":
 				success = True
+			s.close()
 		except socket.timeout:
-			time.sleep(min_wait)
+			time.sleep(max_wait)
 			pass
-		s.close()
 
 
 if __name__ == '__main__':

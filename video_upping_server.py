@@ -33,9 +33,9 @@ def init_queue():
 class Server:
 	def __init__(self):
 		self.host = bind_server_to_address
-		self.port = port
+		self.port = server_port
 		self.backlog = 5
-		self.size = size
+		self.size = socket_size
 		self.server = None
 		self.threads = []
 		self.open_socket()
@@ -84,7 +84,7 @@ def report_success(id, size):
 	os.system("%s -c %i %s" % (omploader_videor_script, size, id))
 
 def report_failure(id):
-	os.system("%s -d %s" % (omploader_videor_script, size, id))
+	os.system("%s -d %s" % (omploader_videor_script, id))
 
 class Client(Thread):
 	class Fail(Exception):
@@ -98,7 +98,7 @@ class Client(Thread):
 		self.client = client
 		self.client.settimeout(min_wait) # really don't need to waste time here, get in and get out asap
 		self.address = address
-		self.size = 4096
+		self.size = socket_size
 
 	def check_response(self, data):
 		if data == "what is\n":

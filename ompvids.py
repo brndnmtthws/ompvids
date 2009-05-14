@@ -12,8 +12,8 @@ import sys
 passkey = os.environ['OMPVIDS_PASSKEY'] # will assplode if not defined in environment
 
 bind_server_to_address = ''
-port = 50000
-size = 4096
+server_port = 50000
+socket_size = 4096
 max_wait = 10 # seconds
 min_wait = 1 # seconds
 
