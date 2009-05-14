@@ -15,13 +15,6 @@ server_hostname = os.environ['SERVER_HOSTNAME']
 
 tmp_path = '/tmp/'
 
-def unlink(file):
-	try:
-		os.unlink(file)
-	except OSError:
-		# no care
-		pass
-
 def do_out(key, bucket, suffix, type):
 	out_k = Key(bucket)
 	out_k.key = key + suffix
