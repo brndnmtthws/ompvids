@@ -68,6 +68,7 @@ def check_server_for_videor():
 			return
 		s.send("what is\n")
 		exp = re.compile('something: (.*)\n')
+		data = ''
 		# nothing, lettuce just wait a while
 		res = exp.match(data)
 		while not res:
