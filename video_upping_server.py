@@ -116,7 +116,7 @@ class Client(Thread):
 				except socket.error:
 					if key:
 						video_queue.put(key)
-		elif:
+		elif len(data) > 0:
 			res1 = re.match('failure with ([A-Za-z0-9]+)/.+\n', data)
 			res2 = re.match('success with (\d+) ([A-Za-z0-9]+)/.+\n', data)
 			if res1:
