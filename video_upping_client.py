@@ -22,7 +22,7 @@ def do_out(key, bucket, suffix, type):
 	out_k.set_contents_from_filename(tmp_path + key_to_filename(key) + suffix)
 	out_k.set_acl('public-read')
 	size = out_k.size
-	os.unlink(tmp_path + key_to_filename(key) + suffix)
+	unlink(tmp_path + key_to_filename(key) + suffix)
 	return size
 
 def process_new_videor(key):
@@ -32,12 +32,12 @@ def process_new_videor(key):
 	in_k.key = key
 	print key
 	in_k.get_contents_to_filename(tmp_path + key_to_filename(key))
-	if os.system('./encode.rb "%s"' % (tmp_path + key_to_filename(key))):
+	if os.system(sys.path[0] + '/encode.rb "%s"' % (tmp_path + key_to_filename(key))):
 		# error!
-		os.unlink(tmp_path + key_to_filename(key) + '.ogg')
-		os.unlink(tmp_path + key_to_filename(key) + '.gif')
-		os.unlink(tmp_path + key_to_filename(key) + '-still.gif')
-		os.unlink(tmp_path + key_to_filename(key))
+		unlink(tmp_path + key_to_filename(key) + '.ogg')
+		unlink(tmp_path + key_to_filename(key) + '.gif')
+		unlink(tmp_path + key_to_filename(key) + '-still.gif')
+		unlink(tmp_path + key_to_filename(key))
 		in_k.delete()
 		return False
 	else:

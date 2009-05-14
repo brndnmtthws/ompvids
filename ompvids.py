@@ -45,3 +45,11 @@ def get_bucket(bucket_name):
 
 def get_answer(passkey, challenge):
 	return hashlib.sha224('%s %li' % (passkey, challenge)).hexdigest()
+
+def unlink(file):
+	try:
+		os.unlink(file)
+	except OSError:
+		# no care
+		pass
+
