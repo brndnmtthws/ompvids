@@ -10,7 +10,7 @@ INPUT_SPEED_FACTOR = 6
 
 # how much of the input video we want to sample
 MIN_PREVIEW_DURATION = 10 # seconds
-MAX_PREVIEW_DURATION = 30 # seconds
+MAX_PREVIEW_DURATION = 20 # seconds
 IDEAL_DURATION_FACTOR = 0.05 # 5%
 
 # the framerate of the preview; increasing this will make the preview smoother
