@@ -54,8 +54,8 @@ def generate_preview(input, input_fps, endpos, output, output_still, width)
   system('mplayer', '-vf', 'scale', '-zoom', '-fps', input_fps.to_s, '-xy', THUMBWIDTH.to_s, '-benchmark', '-ao', 'null', '-endpos', endpos.to_s, '-vo', "gif89a:fps=#{PREVIEW_FPS}:output=\"#{TMP_PATH}/preview.gif\"", input) or return false
   system('mogrify', '-layers', 'optimize', "#{TMP_PATH}/preview.gif") or (system('ffmpegthumbnailer', '-s', THUMBWIDTH.to_s, '-i', input, '-o', "#{TMP_PATH}/preview.gif") and system('mogrify', '-layers', 'optimize', "#{TMP_PATH}/preview.gif")) or return false
   # system('convert', '-coalesce', '-flatten', "#{TMP_PATH}/preview.gif", "#{TMP_PATH}/preview-still.gif") or return false
-  system('ffmpegthumbnailer', '-s', width.to_s, '-f', '-i', input, '-o', "#{TMP_PATH}/preview-still.gif")
-  system('mogrify', "#{TMP_PATH}/preview-still.gif")
+  system('ffmpegthumbnailer', '-s', width.to_s, '-f', '-i', input, '-o', "#{TMP_PATH}/preview-still.gif") or return false
+  system('mogrify', "#{TMP_PATH}/preview-still.gif") or return false
   FileUtils::mv("#{TMP_PATH}/preview.gif", output)
   FileUtils::mv("#{TMP_PATH}/preview-still.gif", output_still)
 end
