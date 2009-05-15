@@ -46,6 +46,7 @@ def process_new_videor(key):
 		size = do_out(key, bucket, '.ogg', 'application/ogg')
 		do_out(key, bucket, '.gif', 'image/gif')
 		do_out(key, bucket, '-still.gif', 'image/gif')
+		unlink(tmp_path + key_to_filename(key))
 		in_k.delete()
 		return size
 
