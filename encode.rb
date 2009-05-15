@@ -8,14 +8,13 @@ THUMBHEIGHT = 90
 # how much faster the input video should be played when generating the preview
 INPUT_SPEED_FACTOR = 6
 
-# how much of the input video we want to sample, as a fraction (0.0 = nothing, 1.0 = whole video)
-PREVIEW_DURATION = 1.0
-
-# the minimum number of seconds of the input video we want to sample
-PREVIEW_DURATION_FLOOR = 30
+# how much of the input video we want to sample
+MIN_PREVIEW_DURATION = 10 # seconds
+MAX_PREVIEW_DURATION = 30 # seconds
+IDEAL_DURATION_FACTOR = 0.05 # 5%
 
 # the framerate of the preview; increasing this will make the preview smoother
-PREVIEW_FPS = 5
+PREVIEW_FPS = 4
 
 AUDIO_QUALITY = 5
 VIDEO_QUALITY = 7
@@ -51,7 +50,7 @@ end
 def generate_preview(input, input_fps, endpos, output, output_still, width)
   # mplayer is not very happy with spaces in the output file name, p awesome
   # this also uses ffmpegthumbnailer as a fallback in case the video is too short for mplayer to catch it (reach out a little bit more to catch it)
-  system('mplayer', '-vf', 'scale', '-zoom', '-fps', input_fps.to_s, '-xy', THUMBWIDTH.to_s, '-benchmark', '-ao', 'null', '-endpos', endpos.to_s, '-vo', "gif89a:fps=#{PREVIEW_FPS}:output=\"#{TMP_PATH}/preview.gif\"", input) or return false
+  system('mplayer', '-speed', '100', '-vf', 'scale', '-zoom', '-fps', input_fps.to_s, '-xy', THUMBWIDTH.to_s, '-benchmark', '-ao', 'null', '-endpos', endpos.to_s, '-vo', "gif89a:fps=#{PREVIEW_FPS}:output=\"#{TMP_PATH}/preview.gif\"", input) or return false
   system('mogrify', '-layers', 'optimize', "#{TMP_PATH}/preview.gif") or (system('ffmpegthumbnailer', '-s', THUMBWIDTH.to_s, '-i', input, '-o', "#{TMP_PATH}/preview.gif") and system('mogrify', '-layers', 'optimize', "#{TMP_PATH}/preview.gif")) or return false
   # system('convert', '-coalesce', '-flatten', "#{TMP_PATH}/preview.gif", "#{TMP_PATH}/preview-still.gif") or return false
   system('ffmpegthumbnailer', '-s', width.to_s, '-f', '-i', input, '-o', "#{TMP_PATH}/preview-still.gif")
@@ -99,11 +98,14 @@ else
 end
 
 input_fps = info['VIDEO_FPS'].to_i * INPUT_SPEED_FACTOR
-endpos = info['LENGTH'].to_i * PREVIEW_DURATION
+endpos = info['LENGTH'].to_i * IDEAL_DURATION_FACTOR
 # sometimes mplayer can't determine the input length, in which case we'll take 30 seconds
-if endpos < PREVIEW_DURATION_FLOOR
-  endpos = PREVIEW_DURATION_FLOOR
+if endpos < MIN_PREVIEW_DURATION
+  endpos = MIN_PREVIEW_DURATION
+elsif endpos > MAX_PREVIEW_DURATION
+  endpos = MAX_PREVIEW_DURATION
 end
+endpos = endpos * INPUT_SPEED_FACTOR
 generate_preview(input, input_fps.to_i, endpos.to_i, thumbnail, thumbnail_still, THUMBWIDTH) or exit 1
 
 # does this thing fit in the thumbnail box?
