@@ -9,6 +9,8 @@ path = ''
 import select
 import socket
 import random
+import rfc822
+import time
 from Queue import Queue, Empty
 from threading import Thread, Condition
 from pyinotify import ProcessEvent, ThreadedNotifier, WatchManager, EventsCodes
@@ -23,12 +25,16 @@ def qsort(keys):
 	if len(keys) <= 1: return keys
 	return qsort( [ lt for lt in keys[1:] if lt.last_modified < keys[0].last_modified ] ) + [ keys[0] ]  +  qsort( [ ge for ge in keys[1:] if ge.last_modified >= keys[0].last_modified ] )
 
-def init_queue():
+def check_queue():
 	bucket = get_bucket(in_bucket_name)
 	keys = bucket.get_all_keys()
 	keys = qsort(keys)
 	for key in keys:
-		video_queue.put(key.key)
+		lm = time.mktime(time.strptime(key.last_modified, '%Y-%m-%dT%H:%M:%S.000Z'))
+		# add anything older than 48 hours back in to the queue
+		if lm - time.timezone < time.time() - 60*60 * 48:
+			video_queue.put(key.key)
+
 
 class Server:
 	def __init__(self):
@@ -39,6 +45,7 @@ class Server:
 		self.server = None
 		self.threads = []
 		self.open_socket()
+		self.last_queue_check = 0
 
 	def had_clients(self):
 		if len(self.threads) > 0:
@@ -60,8 +67,9 @@ class Server:
 			sys.exit(1)
 
 	def run(self):
+		queue_wait = 600
 		input = [self.server,sys.stdin]
-		inputready,outputready,exceptready = select.select(input,[],[])
+		inputready,outputready,exceptready = select.select(input,[],[], queue_wait)
 
 		for s in inputready:
 			if s == self.server:
@@ -73,6 +81,9 @@ class Server:
 			elif s == sys.stdin:
 				# handle standard input
 				junk = sys.stdin.readline()
+		if self.last_queue_check < time.time() - queue_wait:
+			check_queue()
+			self.last_queue_check = time.time()
 
 	def __del__(self):
 		# close all threads
@@ -211,7 +222,6 @@ if __name__ == '__main__':
 	print 'checking for files to be uploaded...'
 	init_upthreads()
 	print 'initializing queue from S3'
-	init_queue()
 
 	mask = EventsCodes.IN_CREATE
 
