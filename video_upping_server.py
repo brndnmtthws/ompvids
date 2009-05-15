@@ -20,6 +20,7 @@ in_bucket_name = os.environ['AWS_IN_BUCKET'] # will assplode if not defined in e
 omploader_videor_script = os.environ['PATH_TO_VIDEOR_SCRIPT'] # will assplode if not defined in environment
 
 video_queue = Queue()
+age_limit = 60*60*48 # 48 hours, in seconds
 
 def qsort(keys):
 	if len(keys) <= 1: return keys
@@ -32,7 +33,7 @@ def check_queue():
 	for key in keys:
 		lm = time.mktime(time.strptime(key.last_modified, '%Y-%m-%dT%H:%M:%S.000Z'))
 		# add anything older than 48 hours back in to the queue
-		if lm - time.timezone < time.time() - 60*60 * 48:
+		if lm - time.timezone < time.time() - age_limit:
 			video_queue.put(key.key)
 
 
@@ -67,7 +68,7 @@ class Server:
 			sys.exit(1)
 
 	def run(self):
-		queue_wait = 600
+		queue_wait = 3600
 		input = [self.server,sys.stdin]
 		inputready,outputready,exceptready = select.select(input,[],[], queue_wait)
 
@@ -83,6 +84,7 @@ class Server:
 				junk = sys.stdin.readline()
 		if self.last_queue_check < time.time() - queue_wait:
 			check_queue()
+			check_notify_path()
 			self.last_queue_check = time.time()
 
 	def __del__(self):
@@ -194,11 +196,12 @@ class UpThread(Thread):
 
 notify_exp = re.compile('-notify-.*')
 
-def init_upthreads():
+def check_notify_path():
 	files = os.listdir(path)
 	for file in files:
 		if notify_exp.match(file):
-			UpThread(file).start()
+			if os.stat(path + file).st_mtime < time.time() - age_limit:
+				UpThread(file).start()
 
 class PThinger(ProcessEvent):
 	def process_IN_CREATE(self, event):
@@ -220,7 +223,7 @@ if __name__ == '__main__':
 		sys.exit(1)
 
 	print 'checking for files to be uploaded...'
-	init_upthreads()
+	check_notify_path()
 	print 'initializing queue from S3'
 
 	mask = EventsCodes.IN_CREATE
