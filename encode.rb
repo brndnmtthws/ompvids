@@ -16,8 +16,8 @@ IDEAL_DURATION_FACTOR = 0.05 # 5%
 # the framerate of the preview; increasing this will make the preview smoother
 PREVIEW_FPS = 4
 
-AUDIO_QUALITY = 5
-VIDEO_QUALITY = 7
+AUDIO_QUALITY = 4
+VIDEO_QUALITY = 3
 TMP_PATH = '/tmp'
 
 def video_info(filename)
