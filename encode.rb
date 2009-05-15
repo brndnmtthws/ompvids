@@ -17,7 +17,7 @@ IDEAL_DURATION_FACTOR = 0.05 # 5%
 PREVIEW_FPS = 4
 
 AUDIO_QUALITY = 4
-VIDEO_QUALITY = 3
+VIDEO_QUALITY = 4
 TMP_PATH = '/tmp'
 
 def video_info(filename)
