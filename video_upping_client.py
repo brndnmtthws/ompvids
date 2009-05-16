@@ -20,7 +20,7 @@ def do_out(key, bucket, suffix, type):
 	out_k.key = key + suffix
 	headers = dict()
 	headers["Content-Type"] =  type
-	headers["Expires"] = time.strftime("%a, %d %b %Y %H:%M:%S GMT", time.gmtime(time.time() + 3153600000))
+	headers["Expires"] = time.strftime("%a, %d %b %Y %H:%M:%S GMT", time.gmtime(time.time() + 315360000))
 	headers["Cache-Control"] = "min-fresh=31536000"
 	out_k.set_contents_from_filename(tmp_path + key_to_filename(key) + suffix, headers)
 	out_k.set_acl('public-read')
