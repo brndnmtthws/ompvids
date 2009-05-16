@@ -18,8 +18,11 @@ tmp_path = '/tmp/'
 def do_out(key, bucket, suffix, type):
 	out_k = Key(bucket)
 	out_k.key = key + suffix
-	out_k.set_metadata("Content-Type", type)
-	out_k.set_contents_from_filename(tmp_path + key_to_filename(key) + suffix)
+	headers = dict()
+	headers["Content-Type"] =  type
+	headers["Expires"] = time.strftime("%a, %d %b %Y %H:%M:%S GMT", time.gmtime(time.time() + 3153600000))
+	headers["Cache-Control"] = "min-fresh=31536000"
+	out_k.set_contents_from_filename(tmp_path + key_to_filename(key) + suffix, headers)
 	out_k.set_acl('public-read')
 	size = out_k.size
 	unlink(tmp_path + key_to_filename(key) + suffix)
