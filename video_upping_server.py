@@ -1,5 +1,9 @@
 #!/usr/bin/python
 #
+# Copyright 2009 Brenden Matthews <brenden@rty.ca>
+#
+# Distributed under the terms of the GNU General Public License v3
+#
 # This thing is pretty simple, it monitors a specific path for new files and
 # then uploads them to amazon's s3 poo.  After a successful upload, it removes
 # the file(s) and notifies the remote encoders that we have something for them.

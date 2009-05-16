@@ -1,4 +1,8 @@
 #
+# Copyright 2009 Brenden Matthews <brenden@rty.ca>
+#
+# Distributed under the terms of the GNU General Public License v3
+#
 # This is common stuff for the ompvids scripts.
 #
 

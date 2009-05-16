@@ -1,5 +1,9 @@
 #!/usr/bin/python
 #
+# Copyright 2009 Brenden Matthews <brenden@rty.ca>
+#
+# Distributed under the terms of the GNU General Public License v3
+#
 # This is the video encoding client.  This will check if there are new videos
 # available, and if so, it will process it.  If not, then it sits and waits
 # until there is something to do.
