@@ -22,8 +22,8 @@ IDEAL_DURATION_FACTOR = 0.05 # 5%
 # the framerate of the preview; increasing this will make the preview smoother
 PREVIEW_FPS = 4
 
-AUDIO_QUALITY = 4
-VIDEO_QUALITY = 4
+AUDIO_QUALITY = 5
+VIDEO_QUALITY = 7
 TMP_PATH = '/tmp'
 
 def video_info(filename)
@@ -103,9 +103,10 @@ if info.has_key? 'ASS'
 	input = subtitled_mkv
 end
 
+input_bitrate = info['VIDEO_BITRATE'].to_i / 1024 # maintain the bitrate so the file size is <= the input
 # don't re-encode if you don't have to
 if (info['DEMUXER'] != 'ogg') or (info['VIDEO_FORMAT'] != 'theo') or (info['AUDIO_FORMAT'] != 'vrbs')
-	system('ffmpeg2theora', '--audioquality', AUDIO_QUALITY.to_s, '--videoquality', VIDEO_QUALITY.to_s, '--optimize', '-o', output, input) or exit 1
+	system('ffmpeg2theora', '--audioquality', AUDIO_QUALITY.to_s, '--videoquality', VIDEO_QUALITY.to_s, '--optimize', '--videobitrate', input_bitrate.to_s, '-o', output, input) or exit 1
 else
 	FileUtils::cp(input, output)
 end
