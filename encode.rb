@@ -24,10 +24,11 @@ PREVIEW_FPS = 4
 
 AUDIO_QUALITY = 5
 VIDEO_QUALITY = 7
+VIDEO_DEFAULT_BITRATE = 1500 # the bitrate is the same as the input typically, but in case we can't determine it, we use this
 TMP_PATH = '/tmp'
 
 def video_info(filename)
-	f = IO.popen("mplayer -ao null -vo null -msglevel identify=6 -endpos 0 '#{filename}'")
+	f = IO.popen("mplayer -ao null -vo null -msglevel identify=6 -endpos 0 '#{filename}'", "r")
 	info = {}
 	f.each do |line|
 		if line =~ /^ID_(.+)=(.+)/
@@ -35,6 +36,17 @@ def video_info(filename)
 		elsif line =~ /^\[mkv\] Track ID (\d+): subtitles \(S_TEXT\/ASS\)/
 			info['ASS'] = $1
 		end
+	end
+	if info['VIDEO_BITRATE'].to_i < 1
+		# if bitrate reported by mplayer was 0 or something else <1, try using ffmpeg instead
+		f = IO.popen("ffmpeg -i '#{filename}' 2>&1", "r")
+		f.each do |line|
+			if line =~ /.*Duration:.*bitrate: \d+ kb\/s/
+				info['VIDEO_BITRATE'] = line.match(/.*Duration:.*bitrate: (\d+) kb\/s/)[1].to_i
+			end
+		end
+	else
+		info['VIDEO_BITRATE'] = info['VIDEO_BITRATE'].to_i / 1024
 	end
 	# pro method of determining whether this is a valid video
 	info['FILENAME'] == filename ? info : nil
@@ -56,7 +68,11 @@ end
 def generate_preview(input, input_fps, endpos, output, output_still, width)
 	# mplayer is not very happy with spaces in the output file name, p awesome
 	# this also uses ffmpegthumbnailer as a fallback in case the video is too short for mplayer to catch it (reach out a little bit more to catch it)
-	peeview = input.match(/[A-Za-z0-9]+-/)[0].to_s + 'peeview'
+	peeview = 'peeview'
+	match = input.match(/[A-Za-z0-9]+-/)
+	if match
+		peeview = match[0].to_s + 'peeview'
+	end
 	system('mplayer', '-speed', '100', '-vf', 'scale', '-zoom', '-fps', input_fps.to_s, '-xy', THUMBWIDTH.to_s, '-benchmark', '-ao', 'null', '-endpos', endpos.to_s, '-vo', "gif89a:fps=#{PREVIEW_FPS}:output=\"#{TMP_PATH}/#{peeview}.gif\"", input) or return false
 	system('mogrify', '-layers', 'optimize', "#{TMP_PATH}/#{peeview}.gif") or (system('ffmpegthumbnailer', '-s', THUMBWIDTH.to_s, '-i', input, '-o', "#{TMP_PATH}/#{peeview}.gif") and system('mogrify', '-layers', 'optimize', "#{TMP_PATH}/#{peeview}.gif")) or return false
 	# system('convert', '-coalesce', '-flatten', "#{TMP_PATH}/#{peeview}.gif", "#{TMP_PATH}/#{peeview}-still.gif") or return false
@@ -67,7 +83,7 @@ def generate_preview(input, input_fps, endpos, output, output_still, width)
 end
 
 if ARGV.empty?
-	puts "usage: #{$0} input-video-file <tmp path>"
+	$stderr.puts "usage: #{$0} input-video-file <tmp path>"
 	exit 1
 end
 
@@ -103,7 +119,11 @@ if info.has_key? 'ASS'
 	input = subtitled_mkv
 end
 
-input_bitrate = info['VIDEO_BITRATE'].to_i / 1024 # maintain the bitrate so the file size is <= the input
+input_bitrate = info['VIDEO_BITRATE'].to_i # maintain the bitrate so the file size is <= the input
+if input_bitrate < 1
+	# uhm, weird case
+	input_bitrate = VIDEO_DEFAULT_BITRATE
+end
 # don't re-encode if you don't have to
 if (info['DEMUXER'] != 'ogg') or (info['VIDEO_FORMAT'] != 'theo') or (info['AUDIO_FORMAT'] != 'vrbs')
 	system('ffmpeg2theora', '--audioquality', AUDIO_QUALITY.to_s, '--videoquality', VIDEO_QUALITY.to_s, '--optimize', '--videobitrate', input_bitrate.to_s, '-o', output, input) or exit 1
