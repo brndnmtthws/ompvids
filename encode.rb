@@ -106,9 +106,9 @@ if info.has_key? 'ASS'
 	subtitled_yuv = File.join(TMP_PATH, 'subtitled.yuv')
 	subtitled_avi = File.join(TMP_PATH, 'subtitled.avi')
 	subtitled_mkv = File.join(TMP_PATH, 'subtitled.mkv')
-	cleanup << subtitled_yuv.path
-	cleanup << subtitled_avi.path
-	cleanup << subtitled_mkv.path
+	cleanup << subtitled_yuv
+	cleanup << subtitled_avi
+	cleanup << subtitled_mkv
 	# burn those subtitles in
 	system('mplayer', '-speed', '100', '-ass', '-ao', 'null', '-vo', "yuv4mpeg:file=#{subtitled_yuv}", input) or exit 1
 	# lossless codec for intermediate stuff, pretty advanced
