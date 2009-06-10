@@ -23,7 +23,7 @@ IDEAL_DURATION_FACTOR = 0.05 # 5%
 PREVIEW_FPS = 4
 
 AUDIO_QUALITY = 5
-VIDEO_QUALITY = 7
+VIDEO_QUALITY = 9
 VIDEO_DEFAULT_BITRATE = 1500 # the bitrate is the same as the input typically, but in case we can't determine it, we use this
 TMP_PATH = '/tmp'
 
