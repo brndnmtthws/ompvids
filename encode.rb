@@ -126,7 +126,7 @@ if input_bitrate < 1
 end
 # don't re-encode if you don't have to
 if (info['DEMUXER'] != 'ogg') or (info['VIDEO_FORMAT'] != 'theo') or (info['AUDIO_FORMAT'] != 'vrbs')
-	system('ffmpeg2theora', '--audioquality', AUDIO_QUALITY.to_s, '--sync', '--videoquality', VIDEO_QUALITY.to_s, '--optimize', '--videobitrate', input_bitrate.to_s, '-o', output, input) # or exit 1 ignored
+	system('ffmpeg2theora', '--audioquality', AUDIO_QUALITY.to_s, '--videoquality', VIDEO_QUALITY.to_s, '--optimize', '--videobitrate', input_bitrate.to_s, '-o', output, input) # or exit 1 ignored
 else
 	FileUtils::cp(input, output)
 end
