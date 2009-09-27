@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 #
 # Copyright 2009 Javeed Shaikh <syscrash2k@gmail.com>
-# Copyright 2009 Brenden Matthews <brenden@rty.ca>
+# Copyright 2009 Brenden Matthews <brenden@diddyinc.com>
 #
 # Distributed under the terms of the GNU General Public License v3
 #
